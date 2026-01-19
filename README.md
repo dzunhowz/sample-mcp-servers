@@ -65,6 +65,12 @@ wizelit-mcp/
 
 ## Environment Variables
 
+### Authentication (Required for login/logout)
+
+- `CHAINLIT_AUTH_SECRET`: Secret key for Chainlit authentication (generate one in production)
+- `OAUTH_GOOGLE_CLIENT_ID`: Google OAuth client ID
+- `OAUTH_GOOGLE_CLIENT_SECRET`: Google OAuth client secret
+
 ### Required
 
 - `AWS_ACCESS_KEY_ID`: AWS access key
@@ -97,6 +103,33 @@ Ask the AI to refactor code:
 - "Improve this function's error handling: [paste code]"
 - "Rewrite this using Pydantic models: [paste code]"
 
+## Authentication
+
+The application now supports user login/logout via Google OAuth. Users with `@wizeline.com` email addresses can authenticate:
+
+1. **Google OAuth**: Users can sign in with their Google account
+2. **Domain Validation**: Only users with `wizeline.com` domain are allowed access
+3. **Persistent Sessions**: User sessions are stored in PostgreSQL database (if configured)
+4. **Logout**: Users can logout from the user menu in the top-right corner
+
+### Setting up OAuth
+
+1. Create a Google OAuth application at [Google Cloud Console](https://console.cloud.google.com/)
+2. Get your Client ID and Client Secret
+3. Add to `.env`:
+   ```
+   OAUTH_GOOGLE_CLIENT_ID=your_client_id
+   OAUTH_GOOGLE_CLIENT_SECRET=your_client_secret
+   ```
+4. Configure PostgreSQL for session persistence (optional but recommended):
+   ```
+   POSTGRES_HOST=localhost
+   POSTGRES_USER=your_user
+   POSTGRES_PASSWORD=your_password
+   POSTGRES_DB=wizelit_mcp
+   POSTGRES_PORT=5432
+   ```
+
 ## Key Features
 
 - **Unified Interface**: Single Chainlit chat interface for both analysis and refactoring
@@ -104,6 +137,7 @@ Ask the AI to refactor code:
 - **GitHub Integration**: Analyze GitHub repositories directly
 - **AWS Bedrock**: Powered by Claude models via AWS Bedrock
 - **MCP Architecture**: Modular server architecture using Model Context Protocol
+- **User Authentication**: Google OAuth with domain-based access control
 
 ## Development
 

@@ -8,6 +8,7 @@ import re
 from typing import Dict, Optional
 
 import chainlit as cl
+from chainlit.data.sql_alchemy import SQLAlchemyDataLayer
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
 
 from agent import agent_runtime
@@ -27,6 +28,29 @@ async def on_chat_start():
     session_id = str(uuid.uuid4())
     cl.user_session.set("session_id", session_id)
     await cl.Message(content="👋 **Wizelit MCP** ready! Ask me to analyze code or refactor snippets.").send()
+
+
+@cl.oauth_callback
+def oauth_callback(
+    provider_id: str, token: str, raw_user_data: Dict[str, str], default_user: cl.User
+) -> Optional[cl.User]:
+    if provider_id == "google" and raw_user_data.get("hd") == "wizeline.com":
+        return default_user
+    return None
+
+
+@cl.data_layer
+def get_data_layer():
+    postgres_host = os.getenv("POSTGRES_HOST")
+    postgres_user = os.getenv("POSTGRES_USER")
+    postgres_password = os.getenv("POSTGRES_PASSWORD")
+    postgres_db = os.getenv("POSTGRES_DB")
+    postgres_port = os.getenv("POSTGRES_PORT", "5432")
+    
+    if all([postgres_host, postgres_user, postgres_password, postgres_db]):
+        db_url = f"postgresql+asyncpg://{postgres_user}:{postgres_password}@{postgres_host}:{postgres_port}/{postgres_db}"
+        return SQLAlchemyDataLayer(conninfo=db_url)
+    return None
 
 
 @cl.on_message

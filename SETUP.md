@@ -178,7 +178,7 @@ POSTGRES_DB=wizelit_mcp
 
 ## Usage Examples
 
-Once running, you can interact with the Chainlit UI at `http://localhost:8000`
+Once running, you can interact with the Chainlit UI at `http://localhost:9191`
 
 ### Code Analysis Examples
 
@@ -241,7 +241,7 @@ make test
 
 1. **Configure Environment**: Edit `.env` with your credentials
 2. **Test the Setup**: Run `./start.sh` to start everything
-3. **Try It Out**: Open `http://localhost:8000` and test the chat interface
+3. **Try It Out**: Open `http://localhost:9191` and test the chat interface
 4. **Customize**: Modify `main.py`, `graph.py`, or MCP servers as needed
 
 ## Troubleshooting

@@ -46,11 +46,13 @@ echo ""
 echo "⏳ Waiting for MCP servers to initialize..."
 sleep 3
 
-# Start Chainlit
+# Start Chainlit (uv)
 echo ""
-echo "🎨 Starting Chainlit app..."
+echo "🎨 Starting Chainlit app (port 9191) with uv..."
 echo ""
-uv run chainlit run main.py
+uv run chainlit run main.py --port 9191 &
+CHAINLIT_PID=$!
+echo "✅ Chainlit PID: $CHAINLIT_PID"
 
 # Cleanup on exit
-trap 'echo ""; echo "🛑 Shutting down..."; kill $CODE_SCOUT_PID $REFACTOR_PID 2>/dev/null; exit' INT TERM
+trap 'echo ""; echo "🛑 Shutting down..."; kill $CODE_SCOUT_PID $REFACTOR_PID $CHAINLIT_PID 2>/dev/null; exit' INT TERM
