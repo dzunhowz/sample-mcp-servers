@@ -1,7 +1,7 @@
 [project]
-name = "wizelit-mcp"
+name = "sample-mcp-servers"
 version = "0.1.0"
-description = "Minimal Wizelit project with MCP servers and SDK integration"
+description = "Sample MCP servers project with Wizelit SDK integration"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
