@@ -14,8 +14,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional
 
-from .github_helper import GitHubHelper, is_github_url
-from .github_cache import get_github_cache
+from github_helper import GitHubHelper, is_github_url
+from github_cache import get_github_cache
 
 
 @dataclass
