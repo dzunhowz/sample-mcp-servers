@@ -9,16 +9,12 @@ FastMCP bundle exposing two MCP servers for the Wizelit UI. No UI is shipped her
 
 ```
 wizelit-mcp/
-├── agent.py                 # (Optional) utility runtime used by the Wizelit UI
-├── graph.py                 # LangGraph definition used by Wizelit UI
-├── database.py              # Optional database manager (persistence)
-├── code_scout/              # Code analysis module
-│   ├── code_scout.py
-│   ├── github_helper.py
-│   └── github_cache.py
 ├── mcp_servers/
 │   ├── code-scout/          # Code Scout MCP server (port 1338, SSE)
-│   │   └── server.py
+│   │   ├── server.py
+│   │   ├── scanner.py
+│   │   ├── github_helper.py
+│   │   └── github_cache.py
 │   └── refactoring-agent/   # Refactoring MCP server (port 1337, SSE)
 │       └── main.py
 └── utils/
@@ -78,7 +74,7 @@ The Wizelit UI (in the `wizelit` repo) should connect to these endpoints using F
 ### Optional
 
 - `GITHUB_TOKEN`: access private repos
-- `REDIS_URL`, `ENABLE_LOG_STREAMING`, `LOG_STREAM_TIMEOUT_SECONDS`: streaming logs for refactoring jobs
+- `REDIS_URL`, `ENABLE_LOG_STREAMING`: streaming logs for refactoring jobs
 - `POSTGRES_*`: enable persistence via `DatabaseManager`
 - `CREWAI_MODEL`, `CREWAI_TIMEOUT_SECONDS`: override CrewAI execution settings
 - `JOB_LOG_TAIL`: number of lines returned when tailing job logs
