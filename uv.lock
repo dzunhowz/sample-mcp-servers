@@ -3602,7 +3602,7 @@ requires-dist = [
     { name = "redis", specifier = ">=4.5.0" },
     { name = "requests", specifier = ">=2.32.3" },
     { name = "uvicorn", specifier = ">=0.30.0" },
-    { name = "wizelit-sdk", git = "https://github.com/duongle-wizeline/wizelit-sdk.git?rev=v0.1.21" },
+    { name = "wizelit-sdk", directory = "../../SDK/wizelit-sdk" },
 ]
 
 [package.metadata.requires-dev]
@@ -4162,8 +4162,8 @@ wheels = [
 
 [[package]]
 name = "wizelit-sdk"
-version = "0.1.21"
-source = { git = "https://github.com/duongle-wizeline/wizelit-sdk.git?rev=v0.1.21#d57dd4548faf4914f59b9ff96ef35c95e4b973c3" }
+version = "0.1.23"
+source = { directory = "../../SDK/wizelit-sdk" }
 dependencies = [
     { name = "asyncpg" },
     { name = "fastmcp" },
@@ -4171,6 +4171,21 @@ dependencies = [
     { name = "sqlalchemy" },
     { name = "typing-extensions" },
 ]
+
+[package.metadata]
+requires-dist = [
+    { name = "asyncpg", specifier = ">=0.26.0" },
+    { name = "black", marker = "extra == 'dev'", specifier = ">=22.0.0" },
+    { name = "build", marker = "extra == 'dev'", specifier = ">=1.0.0" },
+    { name = "fastmcp", specifier = ">=0.1.0" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=7.0.0" },
+    { name = "redis", specifier = ">=4.5.0" },
+    { name = "redis", marker = "extra == 'streaming'", specifier = ">=4.5.0" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.1.0" },
+    { name = "sqlalchemy", specifier = ">=1.4" },
+    { name = "typing-extensions", specifier = ">=4.0.0" },
+]
+provides-extras = ["dev", "streaming"]
 
 [[package]]
 name = "wrapt"

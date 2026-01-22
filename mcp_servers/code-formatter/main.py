@@ -29,7 +29,13 @@ mcp = WizelitAgentWrapper(
 
 @mcp.ingest(
     is_long_running=False,
-    description="Apply Black-style formatting rules to Python code."
+    description="Apply Black-style formatting rules to Python code.",
+    response_handling={
+        "mode": "formatted",
+        "extract_path": "content[0].text",
+        "content_type": "json",
+        "template": "### ✅ Code Formatted Successfully\n\n```json\n{value}\n```"
+    }
 )
 async def format_code(code: str) -> Dict[str, Any]:
     """
@@ -52,7 +58,13 @@ async def format_code(code: str) -> Dict[str, Any]:
 
 @mcp.ingest(
     is_long_running=False,
-    description="Organize and sort Python import statements."
+    description="Organize and sort Python import statements.",
+    response_handling={
+        "mode": "formatted",
+        "extract_path": "content[0].text",
+        "content_type": "json",
+        "template": "### ✅ Imports Organized\n\n```json\n{value}\n```"
+    }
 )
 async def organize_imports(code: str) -> Dict[str, Any]:
     """
@@ -75,7 +87,13 @@ async def organize_imports(code: str) -> Dict[str, Any]:
 
 @mcp.ingest(
     is_long_running=False,
-    description="Normalize indentation in Python code."
+    description="Normalize indentation in Python code.",
+    response_handling={
+        "mode": "formatted",
+        "extract_path": "content[0].text",
+        "content_type": "json",
+        "template": "### ✅ Indentation Normalized\n\n```json\n{value}\n```"
+    }
 )
 async def normalize_indentation(
     code: str,
@@ -97,7 +115,13 @@ async def normalize_indentation(
 
 @mcp.ingest(
     is_long_running=False,
-    description="Apply all formatting rules to Python code (full format)."
+    description="Apply all formatting rules to Python code (full format).",
+    response_handling={
+        "mode": "formatted",
+        "extract_path": "content[0].text",
+        "content_type": "json",
+        "template": "### ✅ Code Fully Formatted\n\n```json\n{value}\n```"
+    }
 )
 async def format_all(code: str, indent_size: int = 4) -> Dict[str, Any]:
     """

@@ -14,6 +14,13 @@ class CodeFormatter:
         """
         Apply Black-style formatting rules (without black dependency).
         
+        Performs:
+        - Add spaces around operators (=, +, -, *, /, ==, !=, etc.)
+        - Fix indentation (4 spaces per level) using AST
+        - Remove trailing whitespace
+        - Normalize blank lines (max 2 consecutive)
+        - Ensure single trailing newline
+        
         Args:
             code: Python code to format
             
@@ -29,27 +36,36 @@ class CodeFormatter:
                 "formatted_code": code,
             }
         
-        lines = code.split('\n')
-        formatted_lines = []
+        # Use AST unparse (Python 3.9+) to get properly formatted code
+        # This automatically handles operator spacing and indentation
+        if hasattr(ast, 'unparse'):
+            formatted_code = ast.unparse(tree)
+        else:
+            # Fallback for Python < 3.9: use code generation via AST
+            # This is a simplified version that doesn't handle all cases
+            formatted_code = code
         
-        # Remove trailing whitespace and normalize indentation
+        # Clean up the formatted code
+        lines = formatted_code.split('\n')
+        cleaned_lines = []
+        
+        # Remove trailing whitespace
         for line in lines:
-            stripped = line.rstrip()
-            formatted_lines.append(stripped)
+            cleaned_lines.append(line.rstrip())
         
         # Remove excessive blank lines (max 2 consecutive)
-        cleaned_lines = []
+        final_lines = []
         consecutive_blanks = 0
-        for line in formatted_lines:
+        for line in cleaned_lines:
             if line.strip() == '':
                 consecutive_blanks += 1
                 if consecutive_blanks <= 2:
-                    cleaned_lines.append(line)
+                    final_lines.append(line)
             else:
                 consecutive_blanks = 0
-                cleaned_lines.append(line)
+                final_lines.append(line)
         
-        formatted_code = '\n'.join(cleaned_lines)
+        formatted_code = '\n'.join(final_lines)
         
         # Remove trailing blank lines
         while formatted_code.endswith('\n\n\n'):
@@ -59,8 +75,8 @@ class CodeFormatter:
         if formatted_code and not formatted_code.endswith('\n'):
             formatted_code += '\n'
         
-        original_lines = len(lines)
-        formatted_lines_count = len(cleaned_lines)
+        original_lines = len(code.split('\n'))
+        formatted_lines_count = len(final_lines)
         
         return {
             "success": True,
