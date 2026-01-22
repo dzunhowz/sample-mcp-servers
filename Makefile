@@ -3,9 +3,9 @@
 help:
 	@echo "Available commands:"
 	@echo "  make install    - Install dependencies"
-	@echo "  make run        - Start both MCP servers"
-	@echo "  make dev        - Start both MCP servers (watch mode not required)"
-	@echo "  make servers    - Start all MCP servers"
+	@echo "  make run        - Start all 4 MCP servers"
+	@echo "  make dev        - Start all 4 MCP servers (watch mode not required)"
+	@echo "  make servers    - Show how to start servers individually"
 	@echo "  make clean      - Clean cache and temp files"
 	@echo "  make test       - Run tests"
 	@echo "  make format     - Format code"
@@ -20,10 +20,19 @@ dev:
 	./start.sh
 
 servers:
-	@echo "Starting MCP servers..."
-	@echo "Run in separate terminals:"
+	@echo "Starting individual MCP servers:"
+	@echo ""
+	@echo "Code Scout (SSE, port 1338):"
 	@echo "  python mcp_servers/code-scout/server.py"
+	@echo ""
+	@echo "Refactoring Agent (SSE, port 1337):"
 	@echo "  python mcp_servers/refactoring-agent/main.py"
+	@echo ""
+	@echo "Schema Validator (Streamable-HTTP, port 1340):"
+	@echo "  python mcp_servers/schema-validator/main.py"
+	@echo ""
+	@echo "Code Formatter (Stdio):"
+	@echo "  python mcp_servers/code-formatter/main.py"
 
 clean:
 	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true

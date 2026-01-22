@@ -49,8 +49,9 @@ Stop stale processes/ports:
 
 ## Integration
 
-- Refactoring Agent SSE: `http://127.0.0.1:1337/sse`
-- Code Scout SSE: `http://127.0.0.1:1338/sse`
+- **Refactoring Agent SSE**: `http://127.0.0.1:1337/sse`
+- **Code Scout SSE**: `http://127.0.0.1:1338/sse`
+- **Schema Validator Streamable-HTTP**: `http://127.0.0.1:1340/mcp` (POST-based)
 
 The Wizelit UI (in the separate `wizelit` repo) should connect to these FastMCP endpoints.
 
