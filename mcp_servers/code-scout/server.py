@@ -5,24 +5,12 @@ Supports local directories and GitHub repositories.
 """
 
 import asyncio
-import os
-import sys
 from dataclasses import asdict
 from pathlib import Path
 from typing import Optional
-
-# Ensure repo root on path so local packages resolve BEFORE imports
-REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-if REPO_ROOT not in sys.path:
-    sys.path.insert(0, REPO_ROOT)
-# Also add the mcp_servers directory itself
-MCP_SERVERS_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-if MCP_SERVERS_ROOT not in sys.path:
-    sys.path.insert(0, MCP_SERVERS_ROOT)
-
 from wizelit_sdk.agent_wrapper import WizelitAgent, Job
-
-from scanner import CodeScout
+from .scanner import CodeScout
+from .github_helper import GitHubHelper
 
 # Initialize FastMCP wrapper (SSE transport, port 1338 to avoid clashing with refactoring-agent)
 mcp = WizelitAgent("CodeScoutAgent", transport="sse", port=1338)
@@ -35,7 +23,6 @@ def _init_scout(root_directory: str, github_token: Optional[str]) -> CodeScout:
 
 def _convert_usage_paths(usages: list, scout: CodeScout) -> list:
     """Convert cached file paths in usage objects back to GitHub URLs when applicable."""
-    from github_helper import GitHubHelper
     parsed = None
 
     if scout.original_input and "github.com" in scout.original_input.lower():
@@ -85,8 +72,6 @@ def _relative_to_root(
 
         # If this is a GitHub repository, convert to GitHub URL format
         if original_input and "github.com" in original_input.lower():
-            from code_scout.github_helper import GitHubHelper
-
             parsed = GitHubHelper.parse_github_url(original_input)
             if parsed:
                 # Get relative path from root
@@ -120,6 +105,17 @@ async def scan_directory(
     pattern: str = "*.py",
     github_token: Optional[str] = None,
 ):
+    """
+    Scans a directory or GitHub repo for Python files and symbol usages.
+    
+    Args:
+        root_directory: Path to the directory or GitHub repo URL to scan
+        pattern: File pattern to match (default: "*.py")
+        github_token: Optional GitHub token for accessing private repositories
+        
+    Returns:
+        Dictionary mapping symbols to their usage locations
+    """
     def _run():
         scout = _init_scout(root_directory, github_token)
         try:
@@ -145,6 +141,18 @@ async def find_symbol(
     pattern: str = "*.py",
     github_token: Optional[str] = None,
 ):
+    """
+    Finds all usages of a symbol in the scanned codebase.
+    
+    Args:
+        root_directory: Path to the directory or GitHub repo URL to scan
+        symbol_name: Name of the symbol to find
+        pattern: File pattern to match (default: "*.py")
+        github_token: Optional GitHub token for accessing private repositories
+        
+    Returns:
+        List of usage locations for the specified symbol
+    """
     def _run():
         scout = _init_scout(root_directory, github_token)
         try:
@@ -166,6 +174,18 @@ async def analyze_impact(
     pattern: str = "*.py",
     github_token: Optional[str] = None,
 ):
+    """
+    Analyzes the impact of changing a symbol in the codebase.
+    
+    Args:
+        root_directory: Path to the directory or GitHub repo URL to scan
+        symbol_name: Name of the symbol to analyze
+        pattern: File pattern to match (default: "*.py")
+        github_token: Optional GitHub token for accessing private repositories
+        
+    Returns:
+        Impact analysis results for the specified symbol
+    """
     def _run():
         scout = _init_scout(root_directory, github_token)
         try:
@@ -265,8 +285,6 @@ async def build_dependency_graph(
                     scout.original_input
                     and "github.com" in scout.original_input.lower()
                 ):
-                    from code_scout.github_helper import GitHubHelper
-
                     parsed = GitHubHelper.parse_github_url(scout.original_input)
                     if parsed and "file_path" in node_dict:
                         owner = parsed.get("owner")
