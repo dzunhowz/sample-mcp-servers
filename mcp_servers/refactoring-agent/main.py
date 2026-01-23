@@ -223,6 +223,19 @@ async def start_refactoring_job(code_snippet: str, instruction: str, job: Job) -
     """
     Submits a Python code snippet to the Engineering Crew for refactoring.
     Returns a Job ID immediately (does not wait for completion).
+    
+    Args:
+        code_snippet: The existing Python code to refactor
+        instruction: Specific instructions for the refactoring task
+        job: Job object for managing the refactoring task execution
+        
+    Decorator Parameters:
+        response_handling: Configures how tool responses are formatted.
+            - mode: "formatted" - uses template-based formatting
+            - template: Format string with {value} placeholder for job ID
+            
+    Returns:
+        Job ID for tracking the refactoring task status
     """
     job.logger.info("📨 Job submitted.")
     # Run the refactoring crew in the background while Job manages status, result, and heartbeat
@@ -238,6 +251,16 @@ async def get_job_status(job_id: str) -> Dict[str, Any]:
     """
     Checks the status of a refactoring job. Returns logs or the final result.
     Falls back to database if job not found in memory.
+    
+    Args:
+        job_id: The unique identifier of the refactoring job to check
+        
+    Decorator Parameters:
+        response_handling: Configures how tool responses are formatted.
+            - mode: "direct" - returns raw result without additional formatting
+            
+    Returns:
+        Dictionary containing job status, logs, result, and/or error information
     """
     # Try in-memory first
     job = mcp.get_job(job_id)

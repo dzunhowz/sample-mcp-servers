@@ -112,6 +112,17 @@ async def scan_directory(
     pattern: str = "*.py",
     github_token: Optional[str] = None,
 ):
+    """
+    Scans a directory or GitHub repo for Python files and symbol usages.
+    
+    Args:
+        root_directory: Path to the directory or GitHub repo URL to scan
+        pattern: File pattern to match (default: "*.py")
+        github_token: Optional GitHub token for accessing private repositories
+        
+    Returns:
+        Dictionary mapping symbols to their usage locations
+    """
     def _run():
         scout = _init_scout(root_directory, github_token)
         try:
@@ -137,6 +148,18 @@ async def find_symbol(
     pattern: str = "*.py",
     github_token: Optional[str] = None,
 ):
+    """
+    Finds all usages of a symbol in the scanned codebase.
+    
+    Args:
+        root_directory: Path to the directory or GitHub repo URL to scan
+        symbol_name: Name of the symbol to find
+        pattern: File pattern to match (default: "*.py")
+        github_token: Optional GitHub token for accessing private repositories
+        
+    Returns:
+        List of usage locations for the specified symbol
+    """
     def _run():
         scout = _init_scout(root_directory, github_token)
         try:
@@ -158,6 +181,18 @@ async def analyze_impact(
     pattern: str = "*.py",
     github_token: Optional[str] = None,
 ):
+    """
+    Analyzes the impact of changing a symbol in the codebase.
+    
+    Args:
+        root_directory: Path to the directory or GitHub repo URL to scan
+        symbol_name: Name of the symbol to analyze
+        pattern: File pattern to match (default: "*.py")
+        github_token: Optional GitHub token for accessing private repositories
+        
+    Returns:
+        Impact analysis results for the specified symbol
+    """
     def _run():
         scout = _init_scout(root_directory, github_token)
         try:
