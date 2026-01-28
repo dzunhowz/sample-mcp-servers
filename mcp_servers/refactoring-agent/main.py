@@ -65,7 +65,7 @@ def _extract_lines(text: str) -> list[str]:
     return lines
 
 
-async def _run_refactoring_crew(job: Job, code: str, instruction: str):
+async def _run_refactoring_crew(job: Job, code: str, instruction: str) -> Dict[str, str]:
     """
     Refactor code using CrewAI in two steps:
     1) Architect-style analysis + plan
@@ -298,7 +298,7 @@ async def get_job_status(job_id: str) -> Dict[str, Any]:
 
 
 @mcp.ingest()
-async def get_jobs() -> list[Job]:
+async def get_jobs() -> list[str]:
     """
     Checks the status of a refactoring job. Returns logs or the final result.
     """

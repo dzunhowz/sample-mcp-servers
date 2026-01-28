@@ -13,7 +13,7 @@ import shutil
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, Optional
 
 try:
     # Prefer package-relative imports when available
@@ -45,8 +45,8 @@ class DependencyNode:
 
     symbol: str
     file_path: str
-    dependencies: List[str]
-    dependents: List[str]
+    dependencies: list[str]
+    dependents: list[str]
 
 
 class CodeScout:
@@ -100,7 +100,7 @@ class CodeScout:
         else:
             self.root_directory = Path(root_directory)
 
-        self.symbol_usages: Dict[str, List[SymbolUsage]] = {}
+        self.symbol_usages: Dict[str, list[SymbolUsage]] = {}
 
     def cleanup(self) -> None:
         """Remove any temporary directory that was created by the scout."""
@@ -121,7 +121,7 @@ class CodeScout:
         """Cleanup temp directory if we created it."""
         self.cleanup()
 
-    def scan_directory(self, pattern: Optional[str] = "*.py") -> Dict[str, List[SymbolUsage]]:
+    def scan_directory(self, pattern: Optional[str] = "*.py") -> Dict[str, list[SymbolUsage]]:
         """
         Scan directory for Python files and analyze them.
 
@@ -159,7 +159,7 @@ class CodeScout:
         except SyntaxError as exc:
             print(f"Syntax error in {file_path}: {exc}")
 
-    def analyze_github_file(self, github_url: str) -> Dict[str, List[SymbolUsage]]:
+    def analyze_github_file(self, github_url: str) -> Dict[str, list[SymbolUsage]]:
         """
         Analyze a single file from GitHub URL.
 
@@ -193,7 +193,7 @@ class CodeScout:
             print(f"Syntax error in {github_url}: {exc}")
             return {}
 
-    def find_symbol(self, symbol_name: str) -> List[SymbolUsage]:
+    def find_symbol(self, symbol_name: str) -> list[SymbolUsage]:
         """
         Find all usages of a specific symbol.
 
@@ -205,7 +205,7 @@ class CodeScout:
         """
         return self.symbol_usages.get(symbol_name, [])
 
-    def grep_search(self, pattern: str, file_pattern: str = "*.py") -> List[Dict]:
+    def grep_search(self, pattern: str, file_pattern: str = "*.py") -> list[dict]:
         """
         Perform a grep search for a pattern in the directory.
 
@@ -377,7 +377,7 @@ class SymbolVisitor(ast.NodeVisitor):
         self.file_path = file_path
         self.content = content
         self.lines = content.split("\n")
-        self.symbol_usages: Dict[str, List[SymbolUsage]] = {}
+        self.symbol_usages: Dict[str, list[SymbolUsage]] = {}
 
     def _add_usage(self, symbol: str, node: ast.AST, usage_type: str):
         """Add a symbol usage."""

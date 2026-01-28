@@ -7,7 +7,7 @@ Supports local directories and GitHub repositories.
 import asyncio
 from dataclasses import asdict
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Dict, Any
 from wizelit_sdk.agent_wrapper import WizelitAgent, Job
 from .scanner import CodeScout
 from .github_helper import GitHubHelper
@@ -19,9 +19,7 @@ mcp = WizelitAgent("CodeScoutAgent", transport="sse", port=1338)
 def _init_scout(root_directory: str, github_token: Optional[str]) -> CodeScout:
     """Create a CodeScout instance with caching disabled to ensure fresh results."""
     return CodeScout(root_directory, github_token=github_token, use_cache=False)
-
-
-def _convert_usage_paths(usages: list, scout: CodeScout) -> list:
+def _convert_usage_paths(usages: list[Any], scout: CodeScout) -> list[Any]:
     """Convert cached file paths in usage objects back to GitHub URLs when applicable."""
     parsed = None
 
@@ -104,7 +102,7 @@ async def scan_directory(
     root_directory: str,
     pattern: str = "*.py",
     github_token: Optional[str] = None,
-):
+) -> dict[str, list[Any]]:
     """
     Scans a directory or GitHub repo for Python files and symbol usages.
     
@@ -140,7 +138,7 @@ async def find_symbol(
     symbol_name: str,
     pattern: str = "*.py",
     github_token: Optional[str] = None,
-):
+) -> list[Any]:
     """
     Finds all usages of a symbol in the scanned codebase.
     
@@ -173,7 +171,7 @@ async def analyze_impact(
     symbol_name: str,
     pattern: str = "*.py",
     github_token: Optional[str] = None,
-):
+) -> dict[str, Any]:
     """
     Analyzes the impact of changing a symbol in the codebase.
     
@@ -207,7 +205,7 @@ async def grep_search(
     pattern: str,
     file_pattern: str = "*.py",
     github_token: Optional[str] = None,
-):
+) -> list[dict[str, Any]]:
     def _run():
         scout = _init_scout(root_directory, github_token)
         try:
@@ -215,8 +213,6 @@ async def grep_search(
 
             # Convert file paths in matches if it's a GitHub repo
             if scout.original_input and "github.com" in scout.original_input.lower():
-                from code_scout.github_helper import GitHubHelper
-
                 parsed = GitHubHelper.parse_github_url(scout.original_input)
                 if parsed:
                     owner = parsed.get("owner")
@@ -251,7 +247,7 @@ async def git_blame(
     file_path: str,
     line_number: int,
     github_token: Optional[str] = None,
-):
+) -> Optional[Dict[str, Any]]:
     def _run():
         scout = _init_scout(root_directory, github_token)
         try:
@@ -269,7 +265,7 @@ async def build_dependency_graph(
     root_directory: str,
     pattern: str = "*.py",
     github_token: Optional[str] = None,
-):
+) -> Dict[str, Dict[str, Any]]:
     def _run():
         scout = _init_scout(root_directory, github_token)
         try:
@@ -328,7 +324,7 @@ async def code_scout_symbol_usage(
     github_token: Optional[str] = None,
     max_results: int = 50,
     include_graph: bool = True,
-):
+) -> str:
     def _run() -> str:
         scout = _init_scout(target, github_token)
         try:
@@ -395,7 +391,7 @@ async def code_scout_grep(
     file_pattern: str = "*.py",
     github_token: Optional[str] = None,
     max_results: int = 50,
-):
+) -> str:
     def _run() -> str:
         scout = _init_scout(target, github_token)
         try:
