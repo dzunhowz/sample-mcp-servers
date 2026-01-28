@@ -11,7 +11,7 @@ import shutil
 import subprocess
 import tempfile
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, Optional, Tuple
 
 import requests
 from github import Github, GithubException
@@ -168,7 +168,7 @@ class GitHubHelper:
             print(f"Error cloning repository: {exc}")
             return None
 
-    def fetch_directory_files(self, url: str, pattern: str = "*.py") -> List[Dict[str, str]]:
+    def fetch_directory_files(self, url: str, pattern: str = "*.py") -> list[dict[str, str]]:
         """
         Fetch all files from a GitHub directory.
 

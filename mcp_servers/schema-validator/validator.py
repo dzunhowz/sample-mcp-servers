@@ -2,20 +2,20 @@
 Schema validation utilities for Python code.
 """
 import ast
-from typing import Dict, List, Optional, Any
+from typing import Dict, Optional, Any
 
 
 class SchemaValidator:
     """Validates Python code structure against expected schemas."""
     
     def __init__(self):
-        self.errors: List[str] = []
+        self.errors: list[str] = []
     
     def validate_function_signature(
         self,
         code: str,
         function_name: str,
-        expected_params: List[str],
+        expected_params: list[str],
         expected_return_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
@@ -89,7 +89,7 @@ class SchemaValidator:
         self,
         code: str,
         class_name: str,
-        expected_methods: List[str],
+        expected_methods: list[str],
     ) -> Dict[str, Any]:
         """
         Validate a class structure against expectations.
