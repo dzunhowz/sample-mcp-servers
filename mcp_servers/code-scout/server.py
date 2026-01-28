@@ -307,6 +307,172 @@ async def build_dependency_graph(
     return await asyncio.to_thread(_run)
 
 
+@mcp.ingest(
+    is_long_running=False,
+    description="Generate a Mermaid graph visualization from dependency graph. Returns Mermaid markdown that can be rendered visually.",
+    response_handling={
+        "mode": "direct",
+    },
+)
+async def visualize_dependency_graph(
+    target: str,
+    pattern: str = "*.py",
+    github_token: Optional[str] = None,
+    max_nodes: int = 50,
+    show_files: bool = False,
+) -> str:
+    """
+    Generate a Mermaid graph diagram from the dependency graph.
+    
+    Args:
+        target: Path to the directory or GitHub repo URL to analyze
+        pattern: File pattern to match (default: "*.py")
+        github_token: Optional GitHub token for accessing private repositories
+        max_nodes: Maximum number of nodes to include (default: 50)
+        show_files: If True, include file paths in node labels
+        
+    Returns:
+        Mermaid markdown string for graph visualization
+    """
+    def _run() -> str:
+        scout = _init_scout(target, github_token)
+        try:
+            if not scout.symbol_usages:
+                scout.scan_directory(pattern)
+            
+            graph = scout.build_dependency_graph()
+            
+            if not graph:
+                return "No dependency graph data found. Try scanning the directory first."
+            
+            # Convert DependencyNode objects to dicts
+            graph_dicts: Dict[str, Dict[str, Any]] = {}
+            for symbol, node in graph.items():
+                # Always convert to dict for consistent handling
+                if hasattr(node, "__dataclass_fields__"):
+                    node_dict: Dict[str, Any] = asdict(node)
+                elif isinstance(node, dict):
+                    node_dict = node
+                else:
+                    # Fallback: convert to dict and cast
+                    node_dict = dict(node)  # type: ignore[arg-type]
+                
+                # Convert file paths for GitHub repos
+                if scout.original_input and "github.com" in scout.original_input.lower():
+                    parsed = GitHubHelper.parse_github_url(scout.original_input)
+                    if parsed and isinstance(node_dict, dict) and "file_path" in node_dict:
+                        owner = parsed.get("owner")
+                        repo = parsed.get("repo")
+                        ref = parsed.get("ref", "main")
+                        root_path = Path(scout.root_directory).resolve()
+                        try:
+                            file_path_obj = Path(node_dict["file_path"]).resolve()
+                            if file_path_obj.is_relative_to(root_path):
+                                rel_path = str(file_path_obj.relative_to(root_path))
+                            else:
+                                rel_path = str(file_path_obj)
+                            node_dict["file_path"] = (
+                                f"https://github.com/{owner}/{repo}/blob/{ref}/{rel_path}"
+                            )
+                        except Exception:
+                            pass
+                
+                graph_dicts[symbol] = node_dict
+            
+            # Filter to most interesting nodes (those with dependencies or dependents)
+            interesting_nodes = {
+                symbol: node for symbol, node in graph_dicts.items()
+                if node.get("dependencies") or node.get("dependents")
+            }
+            
+            # Limit number of nodes if too many
+            if len(interesting_nodes) > max_nodes:
+                # Prioritize nodes with most connections
+                sorted_nodes = sorted(
+                    interesting_nodes.items(),
+                    key=lambda x: len(x[1].get("dependencies", [])) + len(x[1].get("dependents", [])),
+                    reverse=True
+                )
+                interesting_nodes = dict(sorted_nodes[:max_nodes])
+            
+            # Build Mermaid graph
+            lines = ["```mermaid", "graph TD"]
+            
+            # Add nodes with descriptions
+            node_ids = {}
+            for idx, (symbol, node) in enumerate(interesting_nodes.items()):
+                node_id = f"N{idx}"
+                node_ids[symbol] = node_id
+                
+                # Create label
+                if show_files:
+                    file_path = node.get("file_path", "")
+                    if "/" in file_path:
+                        file_name = file_path.split("/")[-1]
+                    else:
+                        file_name = file_path
+                    label = f"{symbol}<br/><small>{file_name}</small>"
+                else:
+                    label = symbol
+                
+                # Determine node shape based on connections
+                dep_count = len(node.get("dependencies", []))
+                dependent_count = len(node.get("dependents", []))
+                
+                if dep_count == 0 and dependent_count > 0:
+                    # Source node (no deps, has dependents)
+                    lines.append(f'    {node_id}["{label}"]')
+                    lines.append(f'    style {node_id} fill:#90EE90')
+                elif dep_count > 0 and dependent_count == 0:
+                    # Leaf node (has deps, no dependents)
+                    lines.append(f'    {node_id}("{label}")')
+                    lines.append(f'    style {node_id} fill:#FFB6C1')
+                elif dep_count > 2 or dependent_count > 2:
+                    # Hub node (many connections)
+                    lines.append(f'    {node_id}{{"{label}"}}')
+                    lines.append(f'    style {node_id} fill:#FFD700')
+                else:
+                    # Regular node
+                    lines.append(f'    {node_id}["{label}"]')
+            
+            # Add edges (dependencies)
+            for symbol, node in interesting_nodes.items():
+                if symbol not in node_ids:
+                    continue
+                    
+                source_id = node_ids[symbol]
+                for dep in node.get("dependencies", []):
+                    if dep in node_ids:
+                        target_id = node_ids[dep]
+                        lines.append(f"    {source_id} --> {target_id}")
+            
+            lines.append("```")
+            lines.append("")
+            lines.append("**Legend:**")
+            lines.append("- 🟢 Green rectangles: Source nodes (no dependencies, others depend on them)")
+            lines.append("- 🔴 Pink rounded: Leaf nodes (have dependencies, nothing depends on them)")
+            lines.append("- 🟡 Yellow diamonds: Hub nodes (highly connected, 3+ connections)")
+            lines.append("- ⬜ White rectangles: Regular nodes")
+            lines.append("")
+            
+            # Add statistics
+            total_symbols = len(interesting_nodes)
+            total_edges = sum(len(node.get("dependencies", [])) for node in interesting_nodes.values())
+            
+            lines.append(f"**Statistics:**")
+            lines.append(f"- Total symbols shown: {total_symbols}")
+            lines.append(f"- Total dependencies: {total_edges}")
+            
+            if len(graph) > len(interesting_nodes):
+                lines.append(f"- Note: {len(graph) - len(interesting_nodes)} isolated symbols hidden")
+            
+            return "\n".join(lines)
+        finally:
+            scout.cleanup()
+    
+    return await asyncio.to_thread(_run)
+
+
 # Text-oriented tools matching the previous refactoring-agent behavior
 
 
